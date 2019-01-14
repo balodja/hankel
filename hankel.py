@@ -57,7 +57,7 @@ class ConjectureLogger():
         """
         
         result = check_conjecture(self.element_symbol, zero_minor, minor1, minor2)
-        tex_iff = '\Leftrightarrow' if result else '\nLeftrightarrow'
+        tex_iff = r'\Leftrightarrow' if result else r'\nLeftrightarrow'
         
         def format_results(short):
             tex_zero = self.format_minor(zero_minor, short)
@@ -88,12 +88,9 @@ if __name__ == '__main__':
 
     # Now check some conjectures
     logger = ConjectureLogger()
-    logger.log_conjecture(([0, 1, 2], [0, 2, 3]), ([0, 1, 4], [0, 1, 2]), ([0, 1, 3], [0, 1, 3]))
-    logger.log_conjecture(([0, 1, 2], [0, 2, 4]), ([0, 1, 5], [0, 1, 2]), ([0, 1, 4], [0, 1, 3]))
-    logger.log_conjecture(([0, 1, 2], [0, 2, 5]), ([0, 1, 6], [0, 1, 2]), ([0, 1, 5], [0, 1, 3]))
-    logger.log_conjecture(([0, 1, 2], [0, 3, 4]), ([0, 1, 5], [0, 1, 3]), ([0, 1, 4], [0, 1, 4]))
-    i = sp.Idx('i')
-    j = sp.Idx('j')
+    i, j, k, l = sp.symbols('i j k l', cls=sp.Idx)
     logger.log_conjecture(([0, 1, 2], [0, j, i - 1]), ([0, 1, i], [0, 1, j]), ([0, 1, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([0, 3, 1], [0, j, i - 1]), ([0, 1, i], [0, 2, j]), ([0, 2, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([0, l + 1, 1], [0, j, i - 1]), ([0, 1, i], [0, l, j]), ([0, l, i - 1], [0, 1, j + 1]))
     logger.save('payload_short.tex', True)
     logger.save('payload_long.tex', False)
