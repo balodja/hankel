@@ -12,9 +12,9 @@ def hankel_submatrix(symbol, rows, columns):
     return sp.Matrix([[symbol[r + c] for c in columns] for r in rows])
 
 
-def check_hypothesis(symbol, zero_minor, minor1, minor2):
+def check_conjecture(symbol, zero_minor, minor1, minor2):
     """
-    Check the hypothesis that minor1 equals minor2 under the condition of zero_minor = 0. For Hankel matrix.
+    Check the conjecture that minor1 equals minor2 under the condition of zero_minor = 0. For Hankel matrix.
     
     Actually the function tests whether (minor1 - minor2 == ±zero_minor).
     """
@@ -24,7 +24,7 @@ def check_hypothesis(symbol, zero_minor, minor1, minor2):
     return (det_zero - det1 + det2).equals(0) or (det_zero + det1 - det2).equals(0)
 
 
-class HypothesisLogger():
+class ConjectureLogger():
     """
     Log all the tested hypotheses, and format them to specified tex-file later.
     """
@@ -51,12 +51,12 @@ class HypothesisLogger():
             mat = hankel_submatrix(self.element_symbol, rows, columns)
             return r'\det ' + sp.latex(mat)
     
-    def log_hypothesis(self, zero_minor, minor1, minor2):
+    def log_conjecture(self, zero_minor, minor1, minor2):
         """
-        Test the hypothesis about minors and log the results.
+        Test the conjecture about minors and log the results.
         """
         
-        result = check_hypothesis(self.element_symbol, zero_minor, minor1, minor2)
+        result = check_conjecture(self.element_symbol, zero_minor, minor1, minor2)
         tex_iff = '\Leftrightarrow' if result else '\nLeftrightarrow'
         
         def format_results(short):
@@ -87,13 +87,13 @@ if __name__ == '__main__':
         file.write(sp.latex(sample_matrix))
 
     # Now check some conjectures
-    logger = HypothesisLogger()
-    logger.log_hypothesis(([0, 1, 2], [0, 2, 3]), ([0, 1, 4], [0, 1, 2]), ([0, 1, 3], [0, 1, 3]))
-    logger.log_hypothesis(([0, 1, 2], [0, 2, 4]), ([0, 1, 5], [0, 1, 2]), ([0, 1, 4], [0, 1, 3]))
-    logger.log_hypothesis(([0, 1, 2], [0, 2, 5]), ([0, 1, 6], [0, 1, 2]), ([0, 1, 5], [0, 1, 3]))
-    logger.log_hypothesis(([0, 1, 2], [0, 3, 4]), ([0, 1, 5], [0, 1, 3]), ([0, 1, 4], [0, 1, 4]))
+    logger = ConjectureLogger()
+    logger.log_conjecture(([0, 1, 2], [0, 2, 3]), ([0, 1, 4], [0, 1, 2]), ([0, 1, 3], [0, 1, 3]))
+    logger.log_conjecture(([0, 1, 2], [0, 2, 4]), ([0, 1, 5], [0, 1, 2]), ([0, 1, 4], [0, 1, 3]))
+    logger.log_conjecture(([0, 1, 2], [0, 2, 5]), ([0, 1, 6], [0, 1, 2]), ([0, 1, 5], [0, 1, 3]))
+    logger.log_conjecture(([0, 1, 2], [0, 3, 4]), ([0, 1, 5], [0, 1, 3]), ([0, 1, 4], [0, 1, 4]))
     i = sp.Idx('i')
     j = sp.Idx('j')
-    logger.log_hypothesis(([0, 1, 2], [0, j, i - 1]), ([0, 1, i], [0, 1, j]), ([0, 1, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([0, 1, 2], [0, j, i - 1]), ([0, 1, i], [0, 1, j]), ([0, 1, i - 1], [0, 1, j + 1]))
     logger.save('payload_short.tex', True)
     logger.save('payload_long.tex', False)
