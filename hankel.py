@@ -4,33 +4,23 @@
 import sympy as sp
 
 
-def hankel(n, m, symbols=None):
+def hankel_submatrix(symbol, rows, columns):
     """
-    Construct the n by m Hankel matrix with variables from symbols array.
-    
-    If symbols is not present or None then use x_{n + m}.
+    Calculate the Hankel submatrix at the specified rows and columns.
     """
-    if symbols is None:
-        symbols = ['x_{}'.format(i) for i in range(n + m)]
-    return sp.Matrix(n, m, lambda i, j: symbols[i + j])
+
+    return sp.Matrix([[symbol[r + c] for c in columns] for r in rows])
 
 
-def matrix_minor(matrix, rows, columns):
+def check_hypothesis(symbol, zero_minor, minor1, minor2):
     """
-    Calculate determinant of specified submatrix leaving prescribed rows and columns.
-    """
-    return matrix[rows, columns].det()
-
-
-def check_hypothesis(matrix, zero_minor, minor1, minor2):
-    """
-    Check the hypothesis that minor1 equals minor2 under the condition of zero_minor = 0.
+    Check the hypothesis that minor1 equals minor2 under the condition of zero_minor = 0. For Hankel matrix.
     
     Actually the function tests whether (minor1 - minor2 == ±zero_minor).
     """
-    det_zero = matrix_minor(matrix, *zero_minor)
-    det1 = matrix_minor(matrix, *minor1)
-    det2 = matrix_minor(matrix, *minor2)
+    det_zero = hankel_submatrix(symbol, *zero_minor).det()
+    det1 = hankel_submatrix(symbol, *minor1).det()
+    det2 = hankel_submatrix(symbol, *minor2).det()
     return (det_zero - det1 + det2).equals(0) or (det_zero + det1 - det2).equals(0)
 
 
@@ -39,15 +29,11 @@ class HypothesisLogger():
     Log all the tested hypotheses, and format them to specified tex-file later.
     """
 
-    def __init__(self, n, m):
-        self.matrix_name = 'M'
-        self.matrix = hankel(n, m)
+    def __init__(self):
+        self.matrix_symbol = sp.IndexedBase('H')
+        self.element_symbol = sp.IndexedBase('h')
         self.short_results = []
         self.long_results = []
-        
-        matrix_itself = '$$ ' + self.matrix_name + ' = ' + sp.latex(self.matrix) + ' $$'
-        self.short_results.append(matrix_itself)
-        self.long_results.append(matrix_itself)
     
     def format_minor(self, minor, short=True):
         """
@@ -60,9 +46,9 @@ class HypothesisLogger():
         rows, columns = minor
         if short:
             mat = sp.Matrix([rows, columns])
-            return self.matrix_name + sp.latex(mat)
+            return sp.latex(self.matrix_symbol) + sp.latex(mat)
         else:
-            mat = self.matrix[rows, columns]
+            mat = hankel_submatrix(self.element_symbol, rows, columns)
             return r'\det ' + sp.latex(mat)
     
     def log_hypothesis(self, zero_minor, minor1, minor2):
@@ -70,7 +56,7 @@ class HypothesisLogger():
         Test the hypothesis about minors and log the results.
         """
         
-        result = check_hypothesis(self.matrix, zero_minor, minor1, minor2)
+        result = check_hypothesis(self.element_symbol, zero_minor, minor1, minor2)
         tex_iff = '\Leftrightarrow' if result else '\nLeftrightarrow'
         
         def format_results(short):
@@ -94,10 +80,20 @@ class HypothesisLogger():
 
 
 if __name__ == '__main__':
-    logger = HypothesisLogger(7, 7)
+    # Just one submatrix for clearance
+    sample_matrix = hankel_submatrix(sp.IndexedBase('h'), range(5), range(5))
+    with open('sample_hankel.tex', 'w') as file:
+        file.write('H = ')
+        file.write(sp.latex(sample_matrix))
+
+    # Now check some conjectures
+    logger = HypothesisLogger()
     logger.log_hypothesis(([0, 1, 2], [0, 2, 3]), ([0, 1, 4], [0, 1, 2]), ([0, 1, 3], [0, 1, 3]))
     logger.log_hypothesis(([0, 1, 2], [0, 2, 4]), ([0, 1, 5], [0, 1, 2]), ([0, 1, 4], [0, 1, 3]))
     logger.log_hypothesis(([0, 1, 2], [0, 2, 5]), ([0, 1, 6], [0, 1, 2]), ([0, 1, 5], [0, 1, 3]))
     logger.log_hypothesis(([0, 1, 2], [0, 3, 4]), ([0, 1, 5], [0, 1, 3]), ([0, 1, 4], [0, 1, 4]))
+    i = sp.Idx('i')
+    j = sp.Idx('j')
+    logger.log_hypothesis(([0, 1, 2], [0, j, i - 1]), ([0, 1, i], [0, 1, j]), ([0, 1, i - 1], [0, 1, j + 1]))
     logger.save('payload_short.tex', True)
     logger.save('payload_long.tex', False)
