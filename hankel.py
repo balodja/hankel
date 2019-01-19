@@ -90,7 +90,10 @@ if __name__ == '__main__':
     logger = ConjectureLogger()
     i, j, k, l = sp.symbols('i j k l', cls=sp.Idx)
     logger.log_conjecture(([0, 1, 2], [0, j, i - 1]), ([0, 1, i], [0, 1, j]), ([0, 1, i - 1], [0, 1, j + 1]))
-    logger.log_conjecture(([0, 3, 1], [0, j, i - 1]), ([0, 1, i], [0, 2, j]), ([0, 2, i - 1], [0, 1, j + 1]))
-    logger.log_conjecture(([0, l + 1, 1], [0, j, i - 1]), ([0, 1, i], [0, l, j]), ([0, l, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([0, 1, 3], [0, j, i - 1]), ([0, 1, i], [0, 2, j]), ([0, 2, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([0, 1, l + 1], [0, j, i - 1]), ([0, 1, i], [0, l, j]), ([0, l, i - 1], [0, 1, j + 1]))
+    logger.log_conjecture(([k, 1, l + 1], [0, j, i - 1]), ([k, 1, i], [0, l, j]), ([0, l, i - 1], [k, 1, j + 1]))
+    logger.log_conjecture(([0, 1, 2, 3], [0, 1, j, i - 1]),
+                          ([0, 1, 2, i], [0, 1, 2, j]), ([0, 1, 2, i - 1], [0, 1, 2, j + 1]))
     logger.save('payload_short.tex', True)
     logger.save('payload_long.tex', False)
