@@ -12,16 +12,16 @@ def hankel_submatrix(symbol, rows, columns):
     return sp.Matrix([[symbol[r + c] for c in columns] for r in rows])
 
 
-def check_conjecture(symbol, zero_minor, minor1, minor2):
+def check_conjecture(symbol, minor1, minor2, minor12):
     """
-    Check the conjecture that minor1 equals minor2 under the condition of zero_minor = 0. For Hankel matrix.
+    Check the conjecture that minor1 plus minor2 equals minor12 for Hankel matrix.
     
-    Actually the function tests whether (minor1 - minor2 == ±zero_minor).
+    Actually the function tests whether (minor1 + minor2 - minor12 == 0).
     """
-    det_zero = hankel_submatrix(symbol, *zero_minor).det()
+    det12 = hankel_submatrix(symbol, *minor12).det()
     det1 = hankel_submatrix(symbol, *minor1).det()
     det2 = hankel_submatrix(symbol, *minor2).det()
-    return (det_zero - det1 + det2).equals(0) or (det_zero + det1 - det2).equals(0)
+    return (det1 + det2 - det12).equals(0)
 
 
 class ConjectureLogger():
@@ -51,20 +51,20 @@ class ConjectureLogger():
             mat = hankel_submatrix(self.element_symbol, rows, columns)
             return r'\det ' + sp.latex(mat)
     
-    def log_conjecture(self, zero_minor, minor1, minor2):
+    def log_conjecture(self, minor1, minor2, minor12):
         """
         Test the conjecture about minors and log the results.
         """
         
-        result = check_conjecture(self.element_symbol, zero_minor, minor1, minor2)
-        tex_iff = r'\Leftrightarrow' if result else r'\nLeftrightarrow'
+        result = check_conjecture(self.element_symbol, minor1, minor2, minor12)
+        tex_eq = r'=' if result else r'\neq'
         
         def format_results(short):
-            tex_zero = self.format_minor(zero_minor, short)
             tex1 = self.format_minor(minor1, short)
             tex2 = self.format_minor(minor2, short)
-            template = '$$ {} = 0 {} {} = {} $$'
-            return template.format(tex_zero, tex_iff, tex1, tex2)
+            tex12 = self.format_minor(minor12, short)
+            template = '$$ {} + {} {} {} $$'
+            return template.format(tex1, tex2, tex_eq, tex12)
         
         self.short_results.append(format_results(True))
         self.long_results.append(format_results(False))
@@ -95,5 +95,7 @@ if __name__ == '__main__':
     logger.log_conjecture(([k, 1, l + 1], [0, j, i - 1]), ([k, 1, i], [0, l, j]), ([0, l, i - 1], [k, 1, j + 1]))
     logger.log_conjecture(([0, 1, 2, 3], [0, 1, j, i - 1]),
                           ([0, 1, 2, i], [0, 1, 2, j]), ([0, 1, 2, i - 1], [0, 1, 2, j + 1]))
+    logger.log_conjecture(([0, 1, 2, 3, 4], [0, 1, 2, j, i - 1]),
+                          ([0, 1, 2, 3, i], [0, 1, 2, 3, j]), ([0, 1, 2, 3, i - 1], [0, 1, 2, 3, j + 1]))
     logger.save('payload_short.tex', True)
     logger.save('payload_long.tex', False)
